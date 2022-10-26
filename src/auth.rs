@@ -63,7 +63,12 @@ fn decode_jwt<T: DeserializeOwned>(token: &str, issuer: String) -> Result<T, Err
             ErrorKind::InvalidToken => err!("Token is invalid"),
             ErrorKind::InvalidIssuer => err!("Issuer is invalid"),
             ErrorKind::ExpiredSignature => err!("Token has expired"),
-            _ => err!("Error decoding JWT"),
+            _ => {
+                println!("ErrorKind: {:?}", err.kind());
+                //println!("PublicKey: {:?}", PUBLIC_RSA_KEY);
+                println!("Validation: {:?}", validation);
+                err!("Error decoding JWT")
+            },
         },
     }
 }

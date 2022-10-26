@@ -129,6 +129,8 @@ pub const VERSION: Option<&str> = option_env!("VW_VERSION");
 fn parse_args() {
     let mut pargs = pico_args::Arguments::from_env();
     let version = VERSION.unwrap_or("(Version info from Git not present)");
+    //cargo install --path . --features sqlite
+    use crate::auth::{decode_admin, encode_jwt, generate_admin_claims};
 
     if pargs.contains(["-h", "--help"]) {
         println!("vaultwarden {}", version);
@@ -136,6 +138,28 @@ fn parse_args() {
         exit(0);
     } else if pargs.contains(["-v", "--version"]) {
         println!("vaultwarden {}", version);
+        exit(0);
+    } else if pargs.contains(["-d", "--decodejwt"]) {
+        let args: Vec<_> = std::env::args().skip(1).collect();
+        let token:&str = &args[1];
+
+        if let Err(err) = decode_admin(token) {
+            eprintln!("An error occurred: {:?}", err);
+            std::process::exit(1);
+        }
+        println!("
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+██░▄▄▄░█░██░█▀▄▀█▀▄▀█░▄▄█░▄▄█░▄▄
+██▄▄▄▀▀█░██░█░█▀█░█▀█░▄▄█▄▄▀█▄▄▀
+██░▀▀▀░██▄▄▄██▄███▄██▄▄▄█▄▄▄█▄▄▄
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+        ");
+        exit(0);
+    } else if pargs.contains(["-e", "--encodejwt"]) {
+        let claims = generate_admin_claims();
+        let jwt = encode_jwt(&claims);
+        println!("clains {:#?}", claims);
+        println!("jwt {:#?}", jwt);
         exit(0);
     }
 }
